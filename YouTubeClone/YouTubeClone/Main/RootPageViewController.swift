@@ -7,9 +7,17 @@
 
 import UIKit
 
+protocol RootPageProtocolo: AnyObject {
+    func currentPage(_ index: Int)
+}
+
 class RootPageViewController: UIPageViewController {
     
-    private var subViewControllers: [UIViewController] = []
+    // MARK: - Properties
+    
+    var subViewControllers: [UIViewController] = []
+    var currentIndex: Int = 0
+    weak var delegateRoot: RootPageProtocolo?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,6 +27,8 @@ class RootPageViewController: UIPageViewController {
         setUpViewControllers()
     }
     
+    // MARK: - Methods
+    
     /// Method to charge the all subviews in subViewControllers array
     private func setUpViewControllers() {
         subViewControllers = [HomeViewController(),
@@ -26,6 +36,8 @@ class RootPageViewController: UIPageViewController {
                               PlaylistsViewController(),
                               ChannelsViewController(),
                               AboutViewController()]
+        
+        _ = subViewControllers.enumerated().map { $0.element.view.tag = $0.offset}  // Sirve para agregar un tag a cada viewcontroller de la coleccion subViewControllers
         
         setViewControllersFromIndex(index: 0, direction: .forward)  // First view controller to be displayed is HomeViewController() or zero position in the array
         
@@ -52,11 +64,11 @@ extension RootPageViewController: UIPageViewControllerDelegate, UIPageViewContro
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         
-        let index = subViewControllers.firstIndex(of: viewController) ?? 0
+        let index = subViewControllers.firstIndex(of: viewController) ?? 0  // Position of each view controller
         if index <= 0 {
             return nil
         }
-        return subViewControllers[-1]
+        return subViewControllers[index-1]
         
     }
     
@@ -66,9 +78,20 @@ extension RootPageViewController: UIPageViewControllerDelegate, UIPageViewContro
         if index >= (subViewControllers.count - 1) {
             return nil
         }
-        return subViewControllers[+1]
+        return subViewControllers[index+1]
         
     }
     
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        
+        print("Finished", finished)
+        
+        if let index = pageViewController.viewControllers?.first?.view.tag {
+            // Bloque para obtener la posicion actual del view controller a desplegar
+            currentIndex = index
+            delegateRoot?.currentPage(index)    // Pasar el index a otro view controller (MainViewController)
+        }
+        
+    }
     
 }
