@@ -175,10 +175,6 @@ struct PlaylistModel: Decodable {
 
 
 
-    // Tip
-        // Multicursor: presionar [control + shift] u [option + arrastrar el cursor]
-        
-
 
 
 
